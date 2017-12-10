@@ -1,0 +1,60 @@
+SIMULACE PODNIKU RYCHLÉHO OBÈERSTVENÍ
+
+Úkolem je naprogramovat simulaci jednoho dne v podniku rychlého obèerstvení, kde jsou zamìstnáni kuchaøi a obsluha (pokladní). V prùbìhu dne pøicházejí zákazníci, kteøí si u obsluhy objednají jídlo a èekají, dokud jim není vydáno. Obsluha mezitím informuje o objednávce nìkterého z kuchaøù, který jídlo zaène pøipravovat. Hotové jídlo pøedává kuchaø zpìt obsluze a ta ho nakonec vydá zákazníkovi. Zákazník následnì buï odejde z podniku (pokud si pøál jídlo s sebou), nebo se jde posadit na volné místo u stolu, kde jídlo zkonzumuje a odejde.
+
+ZÁKAZNÍCI
+Každý zákazník si ihned po pøíchodu vybere pokladnu s nejmenším poètem lidí ve frontì. Pokud je tento poèet vyšší než daná mez, odchází z podniku nespokojen. V té samé frontì èeká až do doby, než na nìj pøijde øada (i kdyby se uvolnila nìkterá z dalších pokladen døíve, než je obsloužen, frontu již nezmìní). U obsluhy uèiní objednávku a vyèká, než je mu jídlo pøedáno. Poté buï z podniku odejde, nebo si jde sednout na volné místo. Pokud nikde není volné místo, zaøadí se do fronty na místa a èeká, až se nìjaké uvolní. Následnì se posadí, jídlo zkonzumuje a odejde. Zákazníci se v žádné z front nepøedbíhají. 
+
+Parametry zákazníkù:
+Id - øetìzec identifikující zákazníka.
+Èas pøíchodu - èas (v jednotkách simulace), kdy zákazník pøijde do podniku.
+Trpìlivost - èíslo urèující maximální poèet lidí ve frontì k pokladnì, který je zákazník schopen "ustát".
+Jídlo s sebou - urèuje, zda si zákazník jídlo odnese (true), nebo ho zkonzumuje pøímo v podniku (false).
+Doba konzumace - doba, po kterou zákazník konzumuje jídlo (pokud si ho neodnese pryè).
+
+OBSLUHA
+Každý zamìstnanec obsluhy pøijímá objednávky jen od zákazníkù, kteøí stojí v jeho frontì. Všechny své zákazníky vyøídí za stejnou dobu. Hotovou objednávku pøedá jednomu z kuchaøù. Vybere vždy takového, u kterého je v daném okamžiku zajištìno co nejdøívìjší zhotovení jídla (bere se v potaz doba pøípravy jednoho jídla daným kuchaøem a poèet jídel, které má kuchaø aktuálnì ještì pøipravit). Po pøedání objednávky kuchaøi obsluha vyøizuje objednávky dalších zákazníkù. Pøijde-li hotové jídlo od kuchaøe, je nejprve nutné dokonèit aktuální rozdìlanou objednávku (existuje-li), teprve pak je jídlo vydáno zákazníkovi, který si ho objednal (to nìjakou dobu trvá). Pøípadné další zákazníky je tedy možné obsloužit až po pøedání dosud nepøedaného jídla. 
+
+Parametry obsluhy:
+Id - øetìzec identifikující obsluhu.
+Doba objednávání - doba (v jednotkách simulace), za kterou je vyøízena objednávka jednoho zákazníka.
+Doba vydávání - doba (v jednotkách simulace), za kterou je jídlo pøedáno zákazníkovi.
+
+KUCHAØI
+Všichni kuchaøi pøijímají objednávky ihned (bez jakéhokoliv prodlení). Pokud zrovna pracují na nìjakém jídle, zaøadí novou objednávku do fronty (jídla tak pøipravují ve stejném poøadí, v jakém objednávky pøišly). Celou objednávku kuchaø vyhotoví za pevnì stanovenou dobu. V okamžiku dokonèení jídla ho kuchaø pøepošle zpìt té samé obsluze, která si u nìj objednávku vyžádala. 
+
+Parametry kuchaøù:
+Id - øetìzec identifikující kuchaøe.
+Doba pøípravy - doba (v jednotkách simulace), za kterou kuchaø vyhotoví jednu objednávku.
+
+SIMULAÈNÍ MODEL
+Simulace zaèíná okamžikem vstupu prvního zákazníka (ne však døíve, než je otevírací doba) a konèí v momentì, kdy z podniku odejde poslední zákazník (což mùže být i po zavírací dobì podniku). Parametry modelu se nacházejí v souboru simulace.in a obsahují následující údaje:
+Jednotka - reálný èas v sekundách odpovídající jednotce simulaèního èasu.
+Otevøení Uzavøení - èas otevøení a uzavøení podniku (otevírací doba), obojí ve formátu hh:mm:ss.
+Místa - poèet volných míst, kde mohou zákazníci konzumovat jídlo.
+SeznamKuchaøù - první øádek obsahuje jejich poèet, další pak jednotlivé kuchaøe (parametry jsou oddìlené mezerou a jsou uvedeny ve stejném poøadí, v jakém byly definovány výše).
+SeznamObsluhy - první øádek obsahuje poèet, další pak jednotlivé pokladní (parametry jsou oddìlené mezerou a jsou uvedeny ve stejném poøadí, v jakém byly definovány výše).
+SeznamZákazníkù - první øádek obsahuje jejich poèet, další pak jednotlivé zákazníky (parametry jsou oddìlené mezerou a jsou uvedeny ve stejném poøadí, v jakém byly definovány výše). Zákazníci jsou na vstupu seøazeni dle èasu pøíchodu vzestupnì.
+
+V situacích, kde dle výše definovaného chování nejsou akce urèeny jednoznaènì, rozhoduje poøadí definic na vstupu. Napø. úplnì první zákazník si vybere obsluhu, která byla na vstupu definována nejdøíve (u všech pokladen je zatím prázdno); pøijdou-li zároveò (ve stejný simulaèní èas) dva zákazníci, simulace bere v potaz nejprve zákazníka, který byl definován v definièním souboru výše. V simulaci je vždy definován alespoò: jeden kuchaø, jedna obsluha a jedno volné místo u stolu. Také lze pøedpokládat, že alespoò jeden zákazník bude obsloužen. 
+
+Po skonèení celé simulace jsou na standardní výstup vypsány následující údaje:
+Reálný èas (hh:mm:ss), kdy odešel poslední zákazník.
+Poèet spokojených a nespokojených zákazníkù.
+Maximální reálná doba èekání zákazníka (hh:mm:ss). Poèítá se èekání na obsluhu a èekání na volné místo u stolu.
+Pro každého kuchaøe poèet zhotovených jídel (na jednom øádku vždy identifikátor kuchaøe a poèet jídel).
+Pro všechny pokladní na jednom øádku vždy trojice: identifikátor, poèet obsloužených lidí a délka maximální dosažené fronty.
+
+Pro úèely ladìní je také vhodné mít v programu možnost pøehlednì vypisovat na výstup prùbìh všech událostí (kdy, kdo a co).
+
+UKÁZKOVÝ PØÍKLAD
+Vstup ze souboru: simulace.in 
+
+Standardní výstup:
+13:23:30
+9 1
+00:26:10
+Luigi 3
+Paolo 6
+Angela 6 1
+Antonio 3 1
