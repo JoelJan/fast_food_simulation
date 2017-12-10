@@ -43,6 +43,8 @@ class cook:
         if self.queue<>[] and self.preparation_time % self.time_to_cook==0:
             self.queue.pop(0)
             preparation_time=0
+    def length_queue(self):
+        return(len(self.queue)*time_to_cook-self.preparation_time)
 
 class fast_food_model:
 #   float unit
@@ -51,7 +53,13 @@ class fast_food_model:
 #   list of cooks
 #   list of service
 #   list of customers (ordered by start_time)
-    def _init_():
+    def _init_(self,unit,open_time,close_time,places):
+        self.unit=unit
+        self.open_time=open_time
+        self.close_time=close_time
+        self.places=places
+        lst_cook=[]
+        lst_service=[]
         pass
     def read_empolyes():
         pass
@@ -61,5 +69,10 @@ class fast_food_model:
         pass
     def find_best_cook():
         pass
-    def find_shortest_queue():
-        pass
+    def find_shortest_queue(lst_of_employee):
+        #works for cooks and for service
+        min_queue=min([empl.length_queue() for empl in lst_of_employee])
+        for emloyee in lst_of_employee:
+            if employee.length_queue()==min_queue:
+                return(employee)
+
