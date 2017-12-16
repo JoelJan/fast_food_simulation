@@ -55,22 +55,44 @@ class fast_food_model:
 #   list of cooks
 #   list of service
 #   list of customers (ordered by start_time)
-    def __init__(self,unit,open_time,close_time,places):
+    def __init__(self,unit,open_time,close_time,places,input_file):
         self.unit=unit
         self.open_time=open_time
         self.close_time=close_time
         self.places=places
-        self.lst_cook=[]
-        self.lst_service=[]
+        self.file=open(input_file,'r')
+        self.lst_cooks=self.read_employes(self.file,'cook')
+        self.lst_service=self.read_employes(self.file,'service')
         self.table_queue=[] #table queue is queue of time to eat (int)
         self.time=0
         self.unhappy=0
         self.happy=0
-    def read_employes():
-        pass
-    def read_customer(self):
-#       returns customer
-        pass
+        self.last_customer=self.read_customer(self.file)
+    def read_line(self,f):
+        try:
+            line=f.readline().rstrip('\n')
+            line=tuple([int(x) for x in line.split(';')])
+            return(line)
+        except:
+            print('ERROR in reading')
+    def read_employes(self,f,t,debug=True):
+        lst_to_return=[]
+        line=self.read_line(f)
+        while line:
+            if debug:
+                print(line)
+            if t=='cook':
+                lst_to_return.append(cook(*line))
+            elif t=='service':
+                lst_to_return.append(service(*line))
+            line=self.read_line(f)
+        return(lst_to_return)
+    def read_customer(self,f,debug=True):
+        line=self.read_line(f)
+        if debug==True:
+            print(line)
+        if line:
+            return(customer(*line))
     def time_tick(self):
         #decrease waiting time by 1 for eating ones
         self.table_queue[:(min(len(self.table_queue),self.places))]=[x-1 for x in self.table_queue[:min(len(self.table_queue),self.places)]]
@@ -79,7 +101,7 @@ class fast_food_model:
             self.table_queue.remove(0)
             self.happy=self.happy+1
         # This will move customers whose food is cooked in table queue or away
-        for service in [s.is_cooked() for s in self.lst_cook]:
+        for service in [s.is_cooked() for s in self.lst_cooks]:
             if service is not None:
                 customer_with_food=service.dequeue()
                 if (customer_with_food.food_away):
@@ -87,13 +109,14 @@ class fast_food_model:
                 else:
                     self.table_queue.append(customer_with_food.time_to_eat)
         # This will move read customer while they time is actual time. Each of the chooses shortest service queue
-        while self.last_customer.get_start_time()==self.time:
-            self.last_customer=self.read_customer()
-            best_service=self.find_shortest_queue(self.lst_service)
-            if best_service.length_queue()<=self.last_customer.patience: # If customet is not patience enought, he will leave
-                best_service.enqueue(self.last_customer)
-            else:
-                self.unhappy=self.unhappy+1
+        while self.last_customer and self.last_customer.get_start_time()==self.time:
+            self.last_customer=self.read_customer(self.file)
+            if self.last_customer:
+                best_service=self.find_shortest_queue(self.lst_service)
+                if best_service.length_queue()<=self.last_customer.patience: # If customet is not patience enought, he will leave
+                    best_service.enqueue(self.last_customer)
+                else:
+                    self.unhappy=self.unhappy+1
         self.time=self.time+1
 
     def find_shortest_queue(self,lst_of_employee):
@@ -104,9 +127,12 @@ class fast_food_model:
                 return(employee)
 
 #tests:
-ffm=fast_food_model(1,'10:00','11:00',2)
-ffm.lst_cook=[cook(1,3)]
-ffm.lst_service=[service(1,1,1)]
-ffm.last_customer=customer(1,0,2,False,2)
+ffm=fast_food_model(1,'10:00','11:00',2,'test_employ.txt')
 print(ffm.happy)
 ffm.time_tick()
+print(ffm.happy)
+ffm.time_tick()
+ffm.time_tick()
+ffm.time_tick()
+ffm.time_tick()
+print(ffm.happy)
