@@ -4,18 +4,20 @@ class customer:
 #    int patience
 #    bool take_away
 #    int time_to_eat
-    def _init_(self,id_customer,start_time,patience,take_away,time_to_eat):
+    def __init__(self,id_customer,start_time,patience,take_away,time_to_eat):
         self.id_customer=id_customer
         self.start_time=start_time
         self.patience=patience
         self.take_away=take_away
         self.time_to_eat=time_to_eat
+    def get_start_time(self):
+        return(self.start_time)
 
 class service:
 #    int id_service
 #    int time_to_order
 #    int time_to_prepare
-    def _init_(self,id_service,time_to_order,time_to_prepare):
+    def __init__(self,id_service,time_to_order,time_to_prepare):
         self.id_service=id_service
         self.time_to_order=time_to_order
         self.time_to_prepare=time_to_prepare
@@ -23,28 +25,28 @@ class service:
     def enqueue(self,customer):
         self.queue.append(customer)
     def dequeue(self):
-        self.queue.pop(0)
+        return(self.queue.pop(0))
     def length_queue(self):
         return(len(self.queue))
 
 class cook:
 #    int id_cook
 #    int time_to_cook
-    def _init_(self,id_cook,time_to_cook):
+    def __init__(self,id_cook,time_to_cook):
         self.id_cook=id_cook
         self.time_to_cook=time_to_cook
-        queue=[]
-        preparation_time=0
+        self.queue=[]
+        self.preparation_time=0
     def enqueue(self,service):
         if queue==[]:
-            preparation_time=0
-        self.queue.append(sevice)
-    def is_cooked():
-        if self.queue<>[] and self.preparation_time % self.time_to_cook==0:
-            self.queue.pop(0)
-            preparation_time=0
+           self.preparation_time=0
+        self.queue.append(service)
+    def is_cooked(self):
+        if self.queue and self.preparation_time % self.time_to_cook==0:
+            self.preparation_time=0
+            return(self.queue.pop(0))
     def length_queue(self):
-        return(len(self.queue)*time_to_cook-self.preparation_time)
+        return(len(self.queue)*self.time_to_cook-self.preparation_time)
 
 class fast_food_model:
 #   float unit
@@ -53,26 +55,58 @@ class fast_food_model:
 #   list of cooks
 #   list of service
 #   list of customers (ordered by start_time)
-    def _init_(self,unit,open_time,close_time,places):
+    def __init__(self,unit,open_time,close_time,places):
         self.unit=unit
         self.open_time=open_time
         self.close_time=close_time
         self.places=places
-        lst_cook=[]
-        lst_service=[]
+        self.lst_cook=[]
+        self.lst_service=[]
+        self.table_queue=[] #table queue is queue of time to eat (int)
+        self.time=0
+        self.unhappy=0
+        self.happy=0
+    def read_employes():
         pass
-    def read_empolyes():
+    def read_customer(self):
+#       returns customer
         pass
-    def new_customer():
-        pass
-    def serve_food():
-        pass
-    def find_best_cook():
-        pass
-    def find_shortest_queue(lst_of_employee):
+    def time_tick(self):
+        #decrease waiting time by 1 for eating ones
+        self.table_queue[:(min(len(self.table_queue),self.places))]=[x-1 for x in self.table_queue[:min(len(self.table_queue),self.places)]]
+        #remove those with time 0
+        while self.table_queue.count(0)>0:
+            self.table_queue.remove(0)
+            self.happy=self.happy+1
+        # This will move customers whose food is cooked in table queue or away
+        for service in [s.is_cooked() for s in self.lst_cook]:
+            if service is not None:
+                customer_with_food=service.dequeue()
+                if (customer_with_food.food_away):
+                    self.happy=self.happy+1
+                else:
+                    self.table_queue.append(customer_with_food.time_to_eat)
+        # This will move read customer while they time is actual time. Each of the chooses shortest service queue
+        while self.last_customer.get_start_time()==self.time:
+            self.last_customer=self.read_customer()
+            best_service=self.find_shortest_queue(self.lst_service)
+            if best_service.length_queue()<=self.last_customer.patience: # If customet is not patience enought, he will leave
+                best_service.enqueue(self.last_customer)
+            else:
+                self.unhappy=self.unhappy+1
+        self.time=self.time+1
+
+    def find_shortest_queue(self,lst_of_employee):
         #works for cooks and for service
         min_queue=min([empl.length_queue() for empl in lst_of_employee])
-        for emloyee in lst_of_employee:
+        for employee in lst_of_employee:
             if employee.length_queue()==min_queue:
                 return(employee)
 
+#tests:
+ffm=fast_food_model(1,'10:00','11:00',2)
+ffm.lst_cook=[cook(1,3)]
+ffm.lst_service=[service(1,1,1)]
+ffm.last_customer=customer(1,0,2,False,2)
+print(ffm.happy)
+ffm.time_tick()
