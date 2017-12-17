@@ -74,7 +74,7 @@ class fast_food_model:
             line=tuple([int(x) for x in line.split(';')])
             return(line)
         except:
-            print('ERROR in reading')
+            print(' ')
     def read_employes(self,f,t,debug=True):
         lst_to_return=[]
         line=self.read_line(f)
@@ -93,7 +93,18 @@ class fast_food_model:
             print(line)
         if line:
             return(customer(*line))
-    def time_tick(self):
+    def print_log(self):
+        print('Cooks:')
+        for cook in self.lst_cooks:
+            print (cook.id_cook)
+            print ([s.id_service for s in cook.queue])
+        print('Service:')
+        for service in self.lst_service:
+            print (service.id_service)
+            print ([customer.id_customer for customer in service.queue])
+        print('table')
+        print(self.table_queue)
+    def time_tick(self,debug=True):
         #decrease waiting time by 1 for eating ones
         self.table_queue[:(min(len(self.table_queue),self.places))]=[x-1 for x in self.table_queue[:min(len(self.table_queue),self.places)]]
         #remove those with time 0
@@ -110,14 +121,21 @@ class fast_food_model:
                     self.table_queue.append(customer_with_food.time_to_eat)
         # This will move read customer while they time is actual time. Each of the chooses shortest service queue
         while self.last_customer and self.last_customer.get_start_time()==self.time:
+            best_service=self.find_shortest_queue(self.lst_service)
+            if debug:
+                print('XXXXXXXXXXXXXX')
+                print (best_service.id_service)
+            if best_service.length_queue()<=self.last_customer.patience: # If customet is not patience enought, he will leave
+                best_service.enqueue(self.last_customer)
+            else:
+                self.unhappy=self.unhappy+1
             self.last_customer=self.read_customer(self.file)
-            if self.last_customer:
-                best_service=self.find_shortest_queue(self.lst_service)
-                if best_service.length_queue()<=self.last_customer.patience: # If customet is not patience enought, he will leave
-                    best_service.enqueue(self.last_customer)
-                else:
-                    self.unhappy=self.unhappy+1
+
         self.time=self.time+1
+        if debug:
+            print('time')
+            print(self.time)
+            self.print_log()
 
     def find_shortest_queue(self,lst_of_employee):
         #works for cooks and for service
@@ -128,11 +146,5 @@ class fast_food_model:
 
 #tests:
 ffm=fast_food_model(1,'10:00','11:00',2,'test_employ.txt')
-print(ffm.happy)
-ffm.time_tick()
-print(ffm.happy)
-ffm.time_tick()
-ffm.time_tick()
-ffm.time_tick()
-ffm.time_tick()
-print(ffm.happy)
+for i in range(1,10):
+    ffm.time_tick()
