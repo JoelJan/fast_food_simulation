@@ -22,12 +22,35 @@ class service:
         self.time_to_order=time_to_order
         self.time_to_prepare=time_to_prepare
         self.queue=[]
+        self.ordering_time=0
+        self.serving_time=0
+        self.cnt_to_serve=0
     def enqueue(self,customer):
         self.queue.append(customer)
     def dequeue(self):
         return(self.queue.pop(0))
     def length_queue(self):
         return(len(self.queue))
+    def service_tick(self):
+        if self.queue:
+            ## if I am ordering
+            if self.ordering_time>0:
+                self.ordering_time=self.ordering_time+1
+                if self.ordering_time % self.time_to_order==0:
+                    return('to_cook')
+            elif self.cnt_to_serve>0:
+                self.serving_time=self.serving_time+1
+                if self.serving_time % self.time_to_prepare:
+                    self.cnt_to_serve=self.cnt_to_serve-1
+                    return('to_table')
+            else:
+                self.ordering_time=self.ordering_time+1
+                if self.ordering_time % self.time_to_order==0:
+                    return('to_cook')
+
+
+
+
 
 class cook:
 #    int id_cook
@@ -42,6 +65,7 @@ class cook:
            self.preparation_time=0
         self.queue.append(service)
     def is_cooked(self):
+        self.preparation_time=self.preparation_time+1
         if self.queue and self.preparation_time % self.time_to_cook==0:
             self.preparation_time=0
             return(self.queue.pop(0))
@@ -113,12 +137,14 @@ class fast_food_model:
             self.happy=self.happy+1
         # This will move customers whose food is cooked in table queue or away
         for service in [s.is_cooked() for s in self.lst_cooks]:
-            if service is not None:
+            if service:
                 customer_with_food=service.dequeue()
                 if (customer_with_food.food_away):
                     self.happy=self.happy+1
                 else:
                     self.table_queue.append(customer_with_food.time_to_eat)
+        # Make an order
+
         # This will move read customer while they time is actual time. Each of the chooses shortest service queue
         while self.last_customer and self.last_customer.get_start_time()==self.time:
             best_service=self.find_shortest_queue(self.lst_service)
