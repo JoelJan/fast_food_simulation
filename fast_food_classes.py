@@ -25,6 +25,7 @@ class service:
         self.ordering_time=0
         self.serving_time=0
         self.cnt_to_serve=0
+        self.cnt_ordered=0
     def enqueue(self,customer):
         self.queue.append(customer)
     def dequeue(self):
@@ -33,24 +34,19 @@ class service:
         return(len(self.queue))
     def service_tick(self):
         if self.queue:
-            ## if I am ordering
-            if self.ordering_time>0:
+            ## if I am ordering or no need of serving and someone to order
+            if self.ordering_time>0 or (self.cnt_to_serve==0 and self.cnt_ordered<len(self.queue)):
                 self.ordering_time=self.ordering_time+1
                 if self.ordering_time % self.time_to_order==0:
+                    self.ordering_time=0
+                    self.cnt_ordered=self.cnt_ordered+1
                     return('to_cook')
             elif self.cnt_to_serve>0:
                 self.serving_time=self.serving_time+1
                 if self.serving_time % self.time_to_prepare:
                     self.cnt_to_serve=self.cnt_to_serve-1
+                    self.cnt_ordered=self.cnt_ordered-1
                     return('to_table')
-            else:
-                self.ordering_time=self.ordering_time+1
-                if self.ordering_time % self.time_to_order==0:
-                    return('to_cook')
-
-
-
-
 
 class cook:
 #    int id_cook
