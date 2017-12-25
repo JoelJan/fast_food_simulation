@@ -45,9 +45,10 @@ class service:
                     return('to_cook')
             elif self.cnt_to_serve>0:
                 self.serving_time=self.serving_time+1
-                if self.serving_time % self.time_to_prepare:
+                if self.serving_time % self.time_to_prepare==0:
                     self.cnt_to_serve=self.cnt_to_serve-1
                     self.cnt_ordered=self.cnt_ordered-1
+                    self.serving_time=0
                     return('to_table')
 
 class cook:
@@ -137,6 +138,7 @@ class fast_food_model:
         for service in [s.is_cooked() for s in self.lst_cooks]:
             if service:
                 service.food_is_prepared()
+                print('food is cooked')
         # Service order or serve food
         for service in self.lst_service:
             service_type=service.service_tick()
@@ -146,7 +148,7 @@ class fast_food_model:
                     cook_to_order.enqueue(service)
                 if service_type=='to_table':
                     customer_with_food=service.dequeue()
-                    if (customer_with_food.food_away):
+                    if (customer_with_food.take_away):
                         self.happy=self.happy+1
                     else:
                         self.table_queue.append(customer_with_food.time_to_eat)
