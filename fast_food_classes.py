@@ -32,6 +32,8 @@ class service:
         return(self.queue.pop(0))
     def length_queue(self):
         return(len(self.queue))
+    def food_is_prepared(self):
+        self.cnt_to_serve=self.cnt_to_serve+1
     def service_tick(self):
         if self.queue:
             ## if I am ordering or no need of serving and someone to order
@@ -57,7 +59,7 @@ class cook:
         self.queue=[]
         self.preparation_time=0
     def enqueue(self,service):
-        if queue==[]:
+        if self.queue==[]:
            self.preparation_time=0
         self.queue.append(service)
     def is_cooked(self):
@@ -131,16 +133,23 @@ class fast_food_model:
         while self.table_queue.count(0)>0:
             self.table_queue.remove(0)
             self.happy=self.happy+1
-        # This will move customers whose food is cooked in table queue or away
+        # This will move customers whose food is cooked 
         for service in [s.is_cooked() for s in self.lst_cooks]:
             if service:
-                customer_with_food=service.dequeue()
-                if (customer_with_food.food_away):
-                    self.happy=self.happy+1
-                else:
-                    self.table_queue.append(customer_with_food.time_to_eat)
-        # Make an order
-
+                service.food_is_prepared()
+        # Service order or serve food
+        for service in self.lst_service:
+            service_type=service.service_tick()
+            if service_type:
+                if service_type=='to_cook':
+                    cook_to_order=self.find_shortest_queue(self.lst_cooks)
+                    cook_to_order.enqueue(service)
+                if service_type=='to_table':
+                    customer_with_food=service.dequeue()
+                    if (customer_with_food.food_away):
+                        self.happy=self.happy+1
+                    else:
+                        self.table_queue.append(customer_with_food.time_to_eat)
         # This will move read customer while they time is actual time. Each of the chooses shortest service queue
         while self.last_customer and self.last_customer.get_start_time()==self.time:
             best_service=self.find_shortest_queue(self.lst_service)
