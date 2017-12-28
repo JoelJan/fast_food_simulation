@@ -139,7 +139,19 @@ class fast_food_model:
             if service:
                 service.food_is_prepared()
                 print('food is cooked')
-        # Service order or serve food
+         # This will move read customer while they time is actual time. Each of the chooses shortest service queue
+        while self.last_customer and self.last_customer.get_start_time()==self.time:
+            best_service=self.find_shortest_queue(self.lst_service)
+            if debug:
+                print('XXXXXXXXXXXXXX')
+                print (best_service.id_service)
+            if best_service.length_queue()<=self.last_customer.patience: # If customet is not patience enought, he will leave
+                best_service.enqueue(self.last_customer)
+            else:
+                self.unhappy=self.unhappy+1
+            self.last_customer=self.read_customer(self.file)
+
+       # Service order or serve food
         for service in self.lst_service:
             service_type=service.service_tick()
             if service_type:
@@ -152,18 +164,6 @@ class fast_food_model:
                         self.happy=self.happy+1
                     else:
                         self.table_queue.append(customer_with_food.time_to_eat)
-        # This will move read customer while they time is actual time. Each of the chooses shortest service queue
-        while self.last_customer and self.last_customer.get_start_time()==self.time:
-            best_service=self.find_shortest_queue(self.lst_service)
-            if debug:
-                print('XXXXXXXXXXXXXX')
-                print (best_service.id_service)
-            if best_service.length_queue()<=self.last_customer.patience: # If customet is not patience enought, he will leave
-                best_service.enqueue(self.last_customer)
-            else:
-                self.unhappy=self.unhappy+1
-            self.last_customer=self.read_customer(self.file)
-
         self.time=self.time+1
         if debug:
             print('time')
